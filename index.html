@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>ROBX مركز تحميل التطبيقات</title>
+  <meta name="description" content="واجهة أنيقة ومنظمة لعرض تطبيقات قابلة للتنزيل مع بحث وفلاتر وفرز."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --card: #101722;
+      --muted: #9fb0c3;
+      --text: #e9f0f7;
+      --primary: #2dd4bf;
+      --primary-2: #22c55e;
+      --ring: 0 0 0 3px rgba(45,212,191,.35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    :root.light{
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #5b6b7c;
+      --text: #0f172a;
+      --primary: #06b6d4;
+      --primary-2: #16a34a;
+      --ring: 0 0 0 3px rgba(6,182,212,.28);
+      --shadow: 0 10px 25px rgba(2,6,23,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Cairo', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:radial-gradient(1200px 1000px at 80% -10%, rgba(45,212,191,.08), transparent 60%),
+                 radial-gradient(900px 700px at 10% -10%, rgba(34,197,94,.08), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      line-height:1.7
+    }
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1150px;margin:0 auto;padding:18px}
+    header{
+      position:sticky;top:0;z-index:50;backdrop-filter:saturate(150%) blur(8px);
+      background:linear-gradient(to bottom, rgba(11,15,20,.86), rgba(11,15,20,.65));
+    }
+    :root.light header{background:linear-gradient(to bottom, rgba(245,247,251,.9), rgba(245,247,251,.6))}
+    .nav{
+      display:flex;gap:14px;align-items:center;justify-content:space-between;
+      padding:14px 0
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{
+      width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));
+      display:grid;place-items:center;box-shadow:var(--shadow)
+    }
+    .logo svg{filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
+    .title{font-weight:800;letter-spacing:.3px}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .search{position:relative;flex:1 1 300px}
+    .search input{
+      width:100%;padding:12px 40px 12px 14px;border-radius:14px;border:1px solid transparent;
+      outline:none;background:var(--card);color:var(--text);
+      box-shadow:var(--shadow)
+    }
+    .search input:focus{box-shadow:var(--shadow), var(--ring);border-color:transparent}
+    .search .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.7}
+
+    .btn, .chip, select{
+      border:none;outline:none;background:var(--card);color:var(--text);
+      border-radius:14px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;
+      box-shadow:var(--shadow);cursor:pointer
+    }
+    .btn.primary{background:linear-gradient(135deg,var(--primary), var(--primary-2));color:#031016;font-weight:700}
+    .chip{font-size:.9rem;opacity:.95}
+    .chip.active{outline: var(--ring)}
+    select{appearance:none;padding:10px 36px 10px 14px;cursor:pointer}
+    .select-wrap{position:relative}
+    .select-wrap svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.7}
+
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+
+    main{padding-top:8px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    @media (max-width:1100px){.grid{grid-template-columns:repeat(8,1fr)}}
+    @media (max-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+    .card{
+      grid-column: span 4; background:var(--card); border-radius:var(--radius); overflow:hidden;
+      border:1px solid rgba(255,255,255,.04); position:relative; display:flex; flex-direction:column;
+      transition:transform .18s ease, box-shadow .18s ease
+    }
+    .card:hover{transform:translateY(-4px)}
+    .thumb{position:relative;height:160px;background:
+      radial-gradient(400px 200px at 80% 20%, rgba(45,212,191,.35), transparent 40%),
+      radial-gradient(300px 200px at 20% 80%, rgba(34,197,94,.25), transparent 40%),
+      #0d1420}
+    :root.light .thumb{background:
+      radial-gradient(400px 200px at 80% 20%, rgba(6,182,212,.25), transparent 40%),
+      radial-gradient(300px 200px at 20% 80%, rgba(16,185,129,.22), transparent 40%),
+      #e9f3ff}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .badge{
+      position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+      padding:6px 10px;border-radius:999px;font-size:.8rem
+    }
+    :root.light .badge{background:rgba(255,255,255,.7)}
+
+    .content{padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px}
+    .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.9rem}
+    .stars{display:inline-flex;gap:2px;align-items:center}
+    .stars svg{width:16px;height:16px}
+    .desc{color:var(--muted);font-size:.95rem}
+    .actions{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:auto}
+    .actions .left{display:flex;gap:8px;align-items:center}
+
+    .tag{padding:6px 10px;border-radius:999px;font-size:.8rem;background:rgba(255,255,255,.06)}
+    :root.light .tag{background:rgba(2,6,23,.06)}
+
+    footer{margin:32px 0 18px;color:var(--muted);text-align:center}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal{width:min(860px,95vw);background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+    .modal header{background:none;position:unset}
+    .modal .body{padding:16px}
+    .modal .row{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    @media (max-width:860px){.modal .row{grid-template-columns:1fr}}
+    .modal img{width:100%;border-radius:14px}
+    .modal .close{position:absolute;top:18px;left:18px}
+
+    /* Toggle */
+    .toggle{display:inline-flex;align-items:center;gap:10px}
+    .switch{width:48px;height:28px;background:var(--card);border-radius:999px;position:relative;box-shadow:var(--shadow);cursor:pointer}
+    .switch::after{content:"";position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));transition:all .2s ease}
+    :root.light .switch::after{right:auto;left:3px}
+
+    /* Helper */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2l3 6 6 .9-4.5 4.3 1 6.8L12 17l-5.5 3 .9-6.8L3 8.9 9 8l3-6z" fill="#031016"/>
+          </svg>
+        </div>
+        <div>
+          <div class="title">مركز تحميل التطبيقات</div>
+          <div style="color:var(--muted);font-size:.9rem">واجهة أنيقة • سهلة • سريعة</div>
+        </div>
+      </div>
+
+      <div class="toolbar" role="search">
+        <div class="search">
+          <label for="search" class="sr-only">ابحث عن تطبيق</label>
+          <input id="search" type="search" placeholder="ابحث باسم التطبيق أو الوصف…"/>
+          <span class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/></svg>
+          </span>
+        </div>
+
+        <div class="select-wrap" title="الفرز">
+          <select id="sort">
+            <option value="popular">الأكثر شيوعًا</option>
+            <option value="name">الاسم (أ-ي)</option>
+            <option value="rating">التقييم الأعلى</option>
+            <option value="date">الأحدث</option>
+            <option value="size">الأصغر حجمًا</option>
+          </select>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5H7z"/></svg>
+        </div>
+
+        <button id="toggleTheme" class="btn" title="الوضع الليلي/النهاري">
+          <span class="toggle">
+            <span aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.45 10.45l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM12 4V1h-1v3h1zm0 19v-3h-1v3h1zM4 13H1v-1h3v1zm19 0h-3v-1h3v1zM7.05 17.95l-1.79 1.8 1.41 1.41 1.8-1.79-1.42-1.42zM18.36 5.64l1.8-1.79-1.41-1.41-1.79 1.8 1.4 1.4zM12 6a6 6 0 100 12 6 6 0 000-12z"/></svg>
+            </span>
+            <span>الوضع</span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="chips" id="categories" role="tablist" aria-label="تصنيفات التطبيقات">
+        <!-- Categories injected by JS -->
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid" id="grid">
+      <!-- Cards injected by JS -->
+    </section>
+  </main>
+
+  <footer class="container">
+    صُمِّم هذا القالب بملف واحد (HTML + CSS + JS). عدّل البيانات بكل سهولة من الكود.
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <button class="btn close" id="closeModal" aria-label="إغلاق">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29 10.59 10.6l6.3-6.31 1.41 1.42z"/></svg>
+      </button>
+      <header class="container">
+        <div class="brand">
+          <div class="logo" style="width:36px;height:36px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#031016"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.8L12 17l-5.5 3 .9-6.8L3 8.9 9 8l3-6z"/></svg>
+          </div>
+          <div>
+            <div class="title" id="mTitle">عنوان التطبيق</div>
+            <div style="color:var(--muted);font-size:.9rem" id="mSub">فئة • إصدار • حجم</div>
+          </div>
+        </div>
+      </header>
+      <div class="body">
+        <div class="container row">
+          <div>
+            <img id="mShot" alt="لقطة شاشة للتطبيق" src=""/>
+          </div>
+          <div>
+            <h3 style="margin-top:0">الوصف</h3>
+            <p id="mDesc" style="color:var(--muted)"></p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0" id="mTags"></div>
+            <div class="actions">
+              <div class="left">
+                <span class="tag" id="mLicense">مجاني</span>
+                <span class="tag" id="mType">APK</span>
+              </div>
+              <a id="mLink" class="btn primary" href="#" download>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#031016"><path d="M5 20h14v-2H5m7-14v8l3.5-3.5 1.42 1.41L12 18l-4.92-4.09L8.5 11.5 12 15V4h0z"/></svg>
+                تحميل الآن
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Data ----------
+    const apps = [
+      {
+        id: 'app1',
+        name: 'ROBX MO3LGET ADMAN',
+        category: ' أدوات',
+        rating: 4.7,
+        sizeMB: 5.75,
+        version: '1.O',
+        updated: '2025-07-01',
+        type: 'APK',
+        license: 'مجاني',
+        desc: 'تطبيق قوي للمساعده لعلاج الادمان',
+        image: '',
+        screenshot: '',
+        tags: [ 'سريع', 'بدون إعلانات'],
+        link: 'https://www.mediafire.com/file/rpwvkkuefb49fhq/ROBX_MO3LGET_ADMAN.apk/file'
+      },
+    
+    
+    
+    ];
+
+    // ---------- Helpers ----------
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    const categories = ['الكل', ...Array.from(new Set(apps.map(a => a.category)))];
+
+    function formatSize(mb){
+      return mb >= 1024 ? (mb/1024).toFixed(1) + ' جيجابايت' : mb + ' ميجابايت';
+    }
+
+    function starSVG(filled){
+      return `<svg viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor"><path d="M12 17.3l-5.46 3.23 1.45-6.22L3 9.77l6.36-.54L12 3.5l2.64 5.73 6.36.54-4 4.54 1.45 6.22z"/></svg>`
+    }
+
+    function appCard(app){
+      const stars = Array.from({length:5}, (_,i)=> starSVG(i < Math.round(app.rating-0.01))).join('');
+      const date = new Date(app.updated).toLocaleDateString('ar-EG');
+      const img = app.image ? `<img src="${app.image}" alt="${app.name}">` : '';
+      return `
+      <article class="card" data-name="${app.name}" data-category="${app.category}" data-rating="${app.rating}" data-size="${app.sizeMB}" data-date="${app.updated}">
+        <div class="thumb">
+          ${img}
+          <span class="badge">${app.type}</span>
+        </div>
+        <div class="content">
+          <h3 style="margin:2px 0 0">${app.name}</h3>
+          <div class="meta">
+            <span class="stars" title="تقييم ${app.rating}">${stars}</span>
+            <span>•</span>
+            <span>${app.category}</span>
+            <span>•</span>
+            <span title="آخر تحديث">${date}</span>
+            <span class="tag">${formatSize(app.sizeMB)}</span>
+            <span class="tag">v${app.version}</span>
+          </div>
+          <p class="desc">${app.desc}</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}
+          </div>
+          <div class="actions">
+            <div class="left">
+              <button class="btn" data-details="${app.id}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6a9 9 0 019 9h-2a7 7 0 10-7 7v2a9 9 0 010-18z"/></svg>
+                تفاصيل
+              </button>
+            </div>
+            <a class="btn primary" href="${app.link}" download>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#031016"><path d="M5 20h14v-2H5m7-14v8l3.5-3.5 1.42 1.41L12 18l-4.92-4.09L8.5 11.5 12 15V4h0z"/></svg>
+              تحميل
+            </a>
+          </div>
+        </div>
+      </article>`
+    }
+
+    function renderGrid(list){
+      $('#grid').innerHTML = list.map(appCard).join('');
+      attachDetailsHandlers(list);
+    }
+
+    function renderCategories(){
+      const el = $('#categories');
+      el.innerHTML = categories.map((c,i)=>`<button class="chip ${i===0?'active':''}" data-cat="${c}">${c}</button>`).join('');
+      el.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button[data-cat]');
+        if(!btn) return;
+        $$('#categories .chip').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        filter();
+      })
+    }
+
+    function filter(){
+      const q = $('#search').value.trim().toLowerCase();
+      const activeCat = ($$('#categories .chip.active')[0]?.dataset.cat)||'الكل';
+      let list = apps.filter(a=>{
+        const matchQ = (a.name + ' ' + a.desc + ' ' + a.tags.join(' ')).toLowerCase().includes(q)
+        const matchC = activeCat === 'الكل' ? true : a.category === activeCat
+        return matchQ && matchC
+      })
+      list = sortList(list, $('#sort').value)
+      renderGrid(list)
+    }
+
+    function sortList(list, by){
+      const copy = [...list]
+      switch(by){
+        case 'name': copy.sort((a,b)=> a.name.localeCompare(b.name, 'ar')); break;
+        case 'rating': copy.sort((a,b)=> b.rating - a.rating); break;
+        case 'date': copy.sort((a,b)=> new Date(b.updated) - new Date(a.updated)); break;
+        case 'size': copy.sort((a,b)=> a.sizeMB - b.sizeMB); break;
+        default: // popular – approximate by rating then date
+          copy.sort((a,b)=> (b.rating - a.rating) || (new Date(b.updated) - new Date(a.updated)) );
+      }
+      return copy
+    }
+
+    function attachDetailsHandlers(list){
+      $$('#grid [data-details]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const app = list.find(a=>a.id===btn.dataset.details) || apps.find(a=>a.id===btn.dataset.details)
+          if(!app) return
+          $('#mTitle').textContent = app.name
+          $('#mSub').textContent = `${app.category} • v${app.version} • ${formatSize(app.sizeMB)}`
+          $('#mDesc').textContent = app.desc
+          $('#mTags').innerHTML = app.tags.map(t=>`<span class="tag">${t}</span>`).join('')
+          $('#mLicense').textContent = app.license
+          $('#mType').textContent = app.type
+          $('#mShot').src = app.screenshot || placeholderImage(app.name)
+          $('#mLink').href = app.link
+          openModal()
+        })
+      })
+    }
+
+    function placeholderImage(text){
+      const enc = encodeURIComponent(text)
+      const bg1 = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+      const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--primary-2').trim()
+      return `data:image/svg+xml;utf8,${encodeURIComponent(`
+        <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'>
+          <defs>
+            <linearGradient id='g' x1='0' x2='1' y1='0' y2='1'>
+              <stop offset='0%' stop-color='${bg1}'/><stop offset='100%' stop-color='${bg2}'/>
+            </linearGradient>
+          </defs>
+          <rect width='100%' height='100%' fill='url(#g)'/>
+          <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
+           font-family='Cairo, sans-serif' font-size='64' fill='rgba(3,16,22,.9)'>${text}</text>
+        </svg>
+      `)}`
+    }
+
+    // ---------- Theme ----------
+    function applyTheme(theme){
+      if(theme==='light') document.documentElement.classList.add('light')
+      else document.documentElement.classList.remove('light')
+    }
+    function toggleTheme(){
+      const isLight = document.documentElement.classList.toggle('light')
+      localStorage.setItem('theme', isLight ? 'light' : 'dark')
+      // adjust thumb placeholders after switch (forces re-render via data attr)
+      $$('#grid .card').forEach((c,i)=> c.dataset.t = Date.now()+i)
+    }
+
+    // ---------- Modal ----------
+    function openModal(){ $('#modal').style.display='flex' }
+    function closeModal(){ $('#modal').style.display='none' }
+
+    // ---------- Init ----------
+    function init(){
+      // Theme
+      applyTheme(localStorage.getItem('theme')||'dark')
+
+      // Categories + Grid
+      renderCategories()
+      renderGrid(sortList(apps, 'popular'))
+
+      // Search/Sort handlers
+      $('#search').addEventListener('input', filter)
+      $('#sort').addEventListener('change', ()=>{ filter() })
+
+      // Theme toggle
+      $('#toggleTheme').addEventListener('click', toggleTheme)
+
+      // Modal handlers
+      $('#closeModal').addEventListener('click', closeModal)
+      $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal() })
+
+      // Fallback thumbnails
+      $$('#grid .thumb').forEach((el,i)=>{
+        const article = el.closest('.card')
+        const name = article?.dataset.name || `تطبيق ${i+1}`
+        if(!el.querySelector('img')){
+          const img = new Image();
+          img.alt = name
+          img.loading = 'lazy'
+          img.src = placeholderImage(name)
+          el.prepend(img)
+        }
+      })
+    }
+
+    document.addEventListener('DOMContentLoaded', init)
+  </script>
+</body>
+</html>
